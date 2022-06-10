@@ -1,0 +1,56 @@
+//Building a YOLOv3 Object Detector with Darknet in the Cloud! (GPU ENABLED)
+
+//Step 1: Enabling GPU within your notebook
+//Steps: Colab -> Edit -> Notebook Settings -> GPU -> Save
+
+//Step 2: Cloning and Building Darknet
+//adjust the Makefile to enable OPENCV and GPU for darknet
+//clone darknet repo
+!git clone https://github.com/AlexeyAB/darknet
+//change makefile to have GPU and OPENCV enabled
+%cd darknet
+!sed -i 's/OPENCV=0/OPENCV=1/' Makefile
+!sed -i 's/GPU=0/GPU=1/' Makefile
+!sed -i 's/CUDNN=0/CUDNN=1/' Makefile
+//verify CUDA
+!/usr/local/cuda/bin/nvcc --version
+//make darknet (build)
+//Do not worry about any warnings 
+!make
+
+//Step 3: Download pretrained YOLOv3 weights
+//YOLOv3 has been trained already on the coco dataset which has 80 classes that it can predict.
+//We will grab these pretrained weights so that we can run YOLOv3 on these pretrained classes and get detections.
+//get yolov3 pretrained coco dataset weights
+!wget https://pjreddie.com/media/files/yolov3.weights
+//define helper functions
+def imShow(path):
+  import cv2
+  import matplotlib.pyplot as plt
+  %matplotlib inline
+
+  image = cv2.imread(path)
+  height, width = image.shape[:2]
+  resized_image = cv2.resize(image,(3*width, 3*height), interpolation = cv2.INTER_CUBIC)
+
+  fig = plt.gcf()
+  fig.set_size_inches(18, 10)
+  plt.axis("off")
+  plt.imshow(cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB))
+  plt.show()
+
+//use this to upload files
+def upload():
+  from google.colab import files
+  uploaded = files.upload() 
+  for name, data in uploaded.items():
+    with open(name, 'wb') as f:
+      f.write(data)
+      print ('saved file', name)
+
+//use this to download a file  
+def download(path):
+  from google.colab import files
+  files.download(path)
+
+//....
